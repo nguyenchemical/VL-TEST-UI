@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Vietlott Super Gemini AI - Live 100%</title>
+
+    <link rel="icon" type="image/png" href="icon.png">
+    <meta name="theme-color" content="#0f172a">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            height: 100dvh; margin: 0; padding: 0;
+            display: flex; flex-direction: column;
+            background: #0f172a; color: #f8fafc;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
+
+        .number-ball {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 38px; height: 38px; border-radius: 50%;
+            color: white; font-weight: bold; font-size: 0.95rem; margin: 2px;
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.35), 0 3px 8px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+
+        .ball-mega { background: radial-gradient(circle at 35% 35%, #ef4444, #dc2626, #991b1b); }
+        .ball-power { background: radial-gradient(circle at 35% 35%, #f59e0b, #d97706, #78350f); }
+        .ball-power-special { background: radial-gradient(circle at 35% 35%, #ef4444, #dc2626, #991b1b); border: 2px solid #fbbf24; }
+        .ball-lotto { background: radial-gradient(circle at 35% 35%, #22c55e, #16a34a, #14532d); }
+        .ball-lotto-special { background: radial-gradient(circle at 35% 35%, #f97316, #ea580c, #9a3412); }
+        .ball-max3d { background: radial-gradient(circle at 35% 35%, #d946ef, #a855f7, #6b21a8); }
+        .ball-default { background: radial-gradient(circle at 35% 35%, #3b82f6, #1d4ed8, #1e3a8a); }
+
+        .custom-card {
+            background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .divider-3d { display: inline-block; width: 2px; height: 26px; background-color: #64748b; margin: 0 6px; align-self: center; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="border-b border-slate-700/60 bg-slate-900/90 backdrop-blur-md shrink-0 py-2.5 px-4 z-30">
+        <div class="max-w-4xl mx-auto flex justify-between items-center gap-2">
+            <div class="flex items-center gap-2.5">
+                <img src="icon.png" alt="Logo" class="w-10 h-10 rounded-xl object-cover">
+                <div>
+                    <span class="inline-block px-2 py-0.5 bg-emerald-500/20 text-emerald-400 font-extrabold text-[9px] rounded-full uppercase tracking-wider">REALTIME 100%</span>
+                    <h1 class="text-base font-bold bg-gradient-to-r from-amber-400 to-red-500 bg-clip-text text-transparent">
+                        Vietlott Super Gemini AI
+                    </h1>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span id="data-status" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                    <span>Chờ kết nối...</span>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP -->
+    <main class="max-w-4xl mx-auto w-full px-3 py-3 flex-1 grid grid-cols-1 md:grid-cols-12 gap-3 min-h-0 overflow-hidden">
+
+        <!-- CỘT TRÁI: DỮ LIỆU KẾT QUẢ THẬT TỪ VIETLOTT -->
+        <div class="md:col-span-6 flex flex-col gap-3 min-h-0">
+            
+            <!-- KHUNG HIỂN THỊ KẾT QUẢ KỲ QUAY THẬT -->
+            <div class="custom-card p-3 flex-1 flex flex-col min-h-0 overflow-hidden shadow-lg border-slate-700">
+                <div class="flex items-center justify-between mb-2 shrink-0">
+                    <h3 class="text-xs font-bold uppercase text-amber-400 flex items-center gap-1">
+                        <i data-lucide="radio" class="w-4 h-4 text-red-500 animate-pulse"></i> Kết Quả Vietlott Live
+                    </h3>
+                    <span id="current-game-badge" class="text-[10px] text-amber-300 font-bold bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30 uppercase">
+                        MEGA 6/45
+                    </span>
+                </div>
+
+                <!-- THÔNG TIN KỲ QUAY & JACKPOT THẬT -->
+                <div id="draw-info" class="bg-slate-950 p-2 rounded-lg text-xs space-y-1 mb-2 shrink-0 border border-slate-800">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Kỳ quay: <b id="draw-id" class="text-slate-200">#------</b></span>
+                        <span>Ngày quay: <b id="draw-date" class="text-slate-200">--/--/----</b></span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Jackpot thực tế:</span>
+                        <b id="jackpot-value" class="text-amber-400 font-bold">--- VNĐ</b>
+                    </div>
+                </div>
+
+                <div id="result" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-2 border border-slate-800 rounded-lg bg-slate-950/50">
+                    <div class="text-xs text-slate-500 text-center">Đang tải kết quả live từ vietlott.vn...</div>
+                </div>
+            </div>
+
+            <!-- NÚT CHỌN GAME -->
+            <div class="custom-card p-2 shrink-0">
+                <div class="text-[10px] font-bold uppercase text-slate-400 mb-1.5 px-1">Chọn loại hình xổ số live</div>
+                <div class="flex flex-wrap gap-1.5 justify-center">
+                    <button onclick="switchGame('mega645')" class="game-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-500 hover:text-black transition">Mega 6/45</button>
+                    <button onclick="switchGame('power655')" class="game-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-500 hover:text-black transition">Power 6/55</button>
+                    <button onclick="switchGame('lotto535')" class="game-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-500 hover:text-black transition">Lotto 5/35</button>
+                    <button onclick="switchGame('max3d')" class="game-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-500 hover:text-black transition">Max 3D</button>
+                    <button onclick="switchGame('max3dpro')" class="game-btn text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-500 hover:text-black transition">Max 3D Pro</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CỘT PHẢI: AI DENSE HUẤN LUYỆN TRÊN DỮ LIỆU LỊCH SỬ THẬT -->
+        <div class="md:col-span-6 flex flex-col gap-3 min-h-0">
+
+            <div class="custom-card p-3 shrink-0">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xs font-bold uppercase text-emerald-400 flex items-center gap-1">
+                        <i data-lucide="cpu" class="w-4 h-4"></i> TensorFlow AI Analysis
+                    </h3>
+                    <button onclick="trainAndPredict()" class="text-xs font-extrabold px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-black shadow hover:opacity-90">
+                        ⚡ Phân Tích Lịch Sử Thật
+                    </button>
+                </div>
+                <p class="text-[10px] text-slate-400 leading-relaxed">
+                    AI sử dụng TensorFlow.js chạy trực tiếp trên thiết bị để tính toán mật độ xác suất dựa trên toàn bộ dữ liệu lịch sử quay thưởng được lưu trữ từ Vietlott.
+                </p>
+            </div>
+
+            <!-- LOG HUẤN LUYỆN AI THẬT -->
+            <div class="custom-card p-3 flex-1 flex flex-col min-h-0 overflow-hidden font-mono text-[10px]">
+                <div class="text-slate-400 flex justify-between items-center mb-1 shrink-0">
+                    <span>Engine: <b id="tf-backend" class="text-emerald-400">---</b></span>
+                    <span>Status: <b id="training-status" class="text-amber-400">Sẵn sàng</b></span>
+                </div>
+                <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800 mb-2 shrink-0">
+                    <div id="training-progress" class="bg-gradient-to-r from-emerald-500 to-amber-400 h-full w-0 transition-all duration-150"></div>
+                </div>
+                <div id="training-log" class="flex-1 overflow-y-auto custom-scrollbar leading-relaxed border-t border-slate-800 pt-1.5 space-y-1">
+                    <div class="text-slate-500 italic">[System] Khởi tạo hệ thống live 100% không giả lập...</div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        const WORKER_BASE = "https://super-gemini.nguyenchemical.workers.dev/";
+        const GITHUB_REPO_DATA = "https://raw.githubusercontent.com/nguyenchemical/VL-SUPER-GEMINI-AI/main/data/";
+        
+        let currentGame = "mega645";
+        let currentDrawData = null;
+
+        const GAME_NAMES = {
+            "mega645": "MEGA 6/45",
+            "power655": "POWER 6/55",
+            "lotto535": "LOTTO 5/35",
+            "max3d": "MAX 3D",
+            "max3dpro": "MAX 3D PRO"
+        };
+
+        tf.ready().then(() => {
+            document.getElementById('tf-backend').innerText = tf.getBackend().toUpperCase();
+        });
+
+        function logTrain(html) {
+            const el = document.getElementById('training-log');
+            el.innerHTML = `<div>${html}</div>` + el.innerHTML;
+        }
+
+        // 1. LẤY KẾT QUẢ KỲ MỚI NHẤT TRỰC TIẾP TỪ WORKER (REALTIME 100%)
+        async function fetchLiveDraw(game) {
+            const statusBadge = document.getElementById('data-status');
+            const resDiv = document.getElementById('result');
+            
+            statusBadge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20";
+            statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span><span>Đang tải Live...</span>`;
+
+            try {
+                const res = await fetch(`${WORKER_BASE}?action=latest&game=${game}`, { cache: 'no-cache' });
+                const data = await res.json();
+
+                if (data.ok && data.draw) {
+                    currentDrawData = data.draw;
+                    
+                    // Cập nhật giao diện thông tin kỳ quay thật
+                    document.getElementById('draw-id').innerText = `#${data.draw.id}`;
+                    document.getElementById('draw-date').innerText = data.draw.date;
+                    document.getElementById('jackpot-value').innerText = data.draw.jp ? `${(data.draw.jp / 1000000000).toFixed(2)} Tỷ VNĐ` : "Không áp dụng";
+
+                    displayBalls(data.draw.nums, game);
+
+                    statusBadge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                    statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>Live Online 24/7</span>`;
+                    logTrain(`<b class="text-emerald-400">[Vietlott Live]</b> Đã nhận kết quả mới nhất kỳ #${data.draw.id}`);
+                } else {
+                    throw new Error(data.error || "Không lấy được dữ liệu từ Vietlott");
+                }
+            } catch (err) {
+                statusBadge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20";
+                statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-400"></span><span>Lỗi kết nối</span>`;
+                resDiv.innerHTML = `<div class="text-xs text-red-400 text-center font-bold">Lỗi đọc dữ liệu Vietlott:<br>${err.message}</div>`;
+                logTrain(`<span class="text-red-400">[Error]</span> ${err.message}`);
+            }
+        }
+
+        function displayBalls(numbers, game) {
+            const resDiv = document.getElementById('result');
+            let html = `<div class="flex flex-wrap justify-center items-center gap-1 my-1">`;
+
+            if (game === 'mega645') {
+                html += numbers.map(n => `<span class="number-ball ball-mega">${n < 10 ? '0'+n : n}</span>`).join('');
+            } else if (game === 'power655') {
+                const main = numbers.slice(0, 6);
+                const spec = numbers[6];
+                html += main.map(n => `<span class="number-ball ball-power">${n < 10 ? '0'+n : n}</span>`).join('');
+                if (spec) html += `<span class="number-ball ball-power-special">${spec < 10 ? '0'+spec : spec}</span>`;
+            } else if (game === 'lotto535') {
+                const main = numbers.slice(0, 5);
+                const spec = numbers[5];
+                html += main.map(n => `<span class="number-ball ball-lotto">${n < 10 ? '0'+n : n}</span>`).join('');
+                if (spec) html += `<span class="number-ball ball-lotto-special">${spec < 10 ? '0'+spec : spec}</span>`;
+            } else if (game.startsWith('max3d')) {
+                html += numbers.map((str, idx) => {
+                    const b = String(str).split('').map(d => `<span class="number-ball ball-max3d">${d}</span>`).join('');
+                    return idx < numbers.length - 1 ? b + `<span class="divider-3d"></span>` : b;
+                }).join('');
+            } else {
+                html += numbers.map(n => `<span class="number-ball ball-default">${n < 10 ? '0'+n : n}</span>`).join('');
+            }
+
+            html += `</div>`;
+            resDiv.innerHTML = html;
+        }
+
+        function switchGame(game) {
+            currentGame = game;
+            document.getElementById('current-game-badge').innerText = GAME_NAMES[game];
+            fetchLiveDraw(game);
+        }
+
+        // 2. HUẤN LUYỆN TENSORFLOW AI TRÊN FILE LỊCH SỬ THẬT TỪ REPO
+        async function trainAndPredict() {
+            const statusEl = document.getElementById('training-status');
+            const progressEl = document.getElementById('training-progress');
+
+            statusEl.innerText = "Tải lịch sử...";
+            logTrain(`<b class="text-amber-400">[AI Load]</b> Đang tải file lịch sử data/${currentGame}.json...`);
+
+            try {
+                // Tải dữ liệu lịch sử thật do Worker ghi vào GitHub Repo
+                const res = await fetch(`${GITHUB_REPO_DATA}${currentGame}.json`);
+                if (!res.ok) throw new Error("Chưa có file lịch sử trên Repo. Vui lòng bấm ?action=run-now trên Worker.");
+                
+                const json = await res.json();
+                const draws = json.draws || [];
+
+                if (draws.length < 5) throw new Error("Chưa đủ dữ liệu lịch sử để huấn luyện AI.");
+
+                logTrain(`<b class="text-emerald-400">[Data]</b> Tìm thấy ${draws.length} kỳ quay lịch sử thật!`);
+                statusEl.innerText = "Huấn luyện AI...";
+
+                // Chuyển đổi dữ liệu thành Ma trận TensorFlow
+                let maxNum = currentGame === 'power655' ? 55 : (currentGame === 'lotto535' ? 35 : 45);
+                const vectors = draws.map(d => {
+                    const v = new Array(maxNum).fill(0);
+                    if (Array.isArray(d.nums)) {
+                        d.nums.forEach(n => { if (n >= 1 && n <= maxNum) v[n - 1] = 1; });
+                    }
+                    return v;
+                });
+
+                const xs = tf.tensor2d(vectors.slice(0, -1));
+                const ys = tf.tensor2d(vectors.slice(1));
+
+                const model = tf.sequential();
+                model.add(tf.layers.dense({ units: 32, activation: 'relu', inputShape: [maxNum] }));
+                model.add(tf.layers.dense({ units: maxNum, activation: 'sigmoid' }));
+                model.compile({ optimizer: tf.train.adam(0.01), loss: 'binaryCrossentropy' });
+
+                const epochs = 10;
+                for (let e = 1; e <= epochs; e++) {
+                    const h = await model.fit(xs, ys, { epochs: 1 });
+                    progressEl.style.width = `${Math.round((e / epochs) * 100)}%`;
+                    logTrain(`Epoch <b>${e}/${epochs}</b> - Loss: <b class="text-amber-400">${h.history.loss[0].toFixed(4)}</b>`);
+                    await tf.nextFrame();
+                }
+
+                // Dự đoán xác suất xác thực dựa trên kỳ gần nhất
+                const lastTensor = tf.tensor2d([vectors[0]]);
+                const pred = await model.predict(lastTensor).data();
+                
+                // Lấy ra các chỉ số có xác suất xuất hiện cao nhất
+                let indexed = Array.from(pred).map((p, i) => ({ num: i + 1, prob: p }));
+                indexed.sort((a, b) => b.prob - a.prob);
+                const topNums = indexed.slice(0, 6).map(x => x.num).sort((a, b) => a - b);
+
+                logTrain(`<b class="text-emerald-400">[Xác suất AI]</b> Top 6 số có mật độ xuất hiện cao nhất: <b>${topNums.join(', ')}</b>`);
+
+                xs.dispose(); ys.dispose(); model.dispose(); lastTensor.dispose();
+                statusEl.innerText = "Hoàn tất!";
+
+            } catch (err) {
+                statusEl.innerText = "Lỗi!";
+                logTrain(`<span class="text-red-400">[AI Error]</span> ${err.message}`);
+            }
+        }
+
+        window.onload = () => {
+            if (window.lucide) lucide.createIcons();
+            fetchLiveDraw('mega645');
+        };
+    </script>
+</body>
+</html>
